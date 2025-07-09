@@ -2,16 +2,6 @@
 
 A simple Spring Boot API to manage our office coffee club routine. This project helps decide whose turn it is to make coffee, buy beans, and track expenses.
 
-
-***
-
-## Tech Stack
-
-* **Framework**: Spring Boot
-* **Language**: Kotlin
-* **Build Tool**: Gradle
-* **Database**: Spring Data JPA with PostgreSQL
-
 ***
 This project solves these problems by providing a simple API to:
 
@@ -19,6 +9,17 @@ This project solves these problems by providing a simple API to:
 * **Create Coffee Rounds:** Any user can initiate a coffee round, and the system automatically assigns the task to the correct person.
 * **Track Shared Expenses:** It allows users to log purchases, making it easy to see who has contributed.
 * **Handle User Status:** Users can set their status to "inactive" if they are on vacation so they are skipped in the rotation.
+
+
+***
+
+
+## Tech Stack
+
+* **Framework**: Spring Boot
+* **Language**: Kotlin
+* **Build Tool**: Gradle
+* **Database**: Spring Data JPA with PostgreSQL
 
 
 ### Running the Application
