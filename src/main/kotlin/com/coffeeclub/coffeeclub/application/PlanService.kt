@@ -1,11 +1,13 @@
 package com.coffeeclub.coffeeclub.application
 
 import com.coffeeclub.coffeeclub.domain.DailyPlan
+import com.coffeeclub.coffeeclub.domain.User
 import com.coffeeclub.coffeeclub.domain.WeeklyPlan
 import com.coffeeclub.coffeeclub.infrastructure.persistence.*
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.Calendar
+import java.util.UUID
 import kotlin.math.ceil
 
 @Service
@@ -17,7 +19,13 @@ class PlanService(
     fun generateAndSaveWeeklyPlan(): WeeklyPlan {
         val activeUsers = userRepository.findAll().filter { it.isActive }.sortedBy { it.id }
         if (activeUsers.isEmpty()) {
-            return WeeklyPlan(0, 0, emptyMap(), emptyList())
+            return WeeklyPlan(
+                UUID.randomUUID(),
+                0,
+                0,
+                emptyMap<UUID, User>(),
+                dailyPlans = emptyList<DailyPlan>()
+            )
         }
 
         val dailyAssignments = assignMakersForWeek(activeUsers)
@@ -27,9 +35,27 @@ class PlanService(
         return mapToDomain(savedEntity)
     }
 
+
     fun findCurrentWeeklyPlan(): WeeklyPlan? {
-        val latestPlanEntity = planRepository.findAll().maxByOrNull { it.year * 100 + it.weekOfYear }
-        return latestPlanEntity?.let { mapToDomain(it) }
+        // 1. Get the current year and week number
+        val calendar = Calendar.getInstance()
+        val year = calendar.get(Calendar.YEAR)
+        val weekOfYear = calendar.get(Calendar.WEEK_OF_YEAR)
+
+        // 2. Use the new repository method to find the specific plan for this week
+        val currentPlanEntity = planRepository.findByYearAndWeekOfYear(year, weekOfYear)
+
+        // 3. Map it to the domain object if it exists
+        return currentPlanEntity?.let { mapToDomain(it) }
+    }
+
+
+    fun findTodaysPlan(): DailyPlan? {
+        val currentWeeklyPlan = findCurrentWeeklyPlan()
+        val today = LocalDate.now()
+
+        // Find the daily plan that matches today's date
+        return currentWeeklyPlan?.dailyPlans?.find { it.date == today }
     }
 
     private fun assignMakersForWeek(activeUsers: List<UserEntity>): Map<LocalDate, List<UserEntity>> {
@@ -76,13 +102,15 @@ class PlanService(
 
         val dailyDomainPlans = entity.dailyPlans.map { dailyEntity ->
             DailyPlan(
+                id = dailyEntity.id,
                 date = dailyEntity.date!!,
-                activeUserIds = dailyEntity.activeUsers.map { it.id },
-                coffeeMakerIds = dailyEntity.coffeeMakers.map { it.id }
+                activeUsers = dailyEntity.activeUsers.map { it.id },
+                coffeeMakers = dailyEntity.coffeeMakers.map { it.id }
             )
         }
 
         return WeeklyPlan(
+            id = entity.id,
             year = entity.year,
             weekOfYear = entity.weekOfYear,
             users = allUsersInPlan,
@@ -96,4 +124,10 @@ class PlanService(
         email = this.email,
         isActive = this.isActive
     )
+
+
+
+
+
+
 }

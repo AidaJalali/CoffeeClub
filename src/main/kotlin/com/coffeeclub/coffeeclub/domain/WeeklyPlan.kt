@@ -4,8 +4,9 @@ import java.util.UUID
 
 
 data class WeeklyPlan(
+    val id: UUID,
     val year: Int,
     val weekOfYear: Int,
-    val user: Map<UUID, User>,
+    val users: Map<UUID, User>,
     val dailyPlans: List<DailyPlan>
 )

@@ -7,3 +7,41 @@ Content-Type: application/json
   "email" : "aida@gmail.com"
 }
 
+### Create User 2: Bob
+POST http://localhost:8080/api/users
+Content-Type: application/json
+
+{
+  "name": "Bob",
+  "email": "bob@example.com"
+}
+
+
+### Create User 3: Charlie
+POST http://localhost:8080/api/users
+Content-Type: application/json
+
+{
+  "name": "Charlie",
+  "email": "charlie@example.com"
+}
+
+###
+
+# ------------------
+# Plan Endpoints
+# ------------------
+
+### Generate the plan for the current week
+# This uses the users created above to build the schedule.
+POST http://localhost:8080/api/plans/weekly
+
+###
+
+### Get the full plan for the current week
+GET http://localhost:8080/api/plans/weekly/current
+
+###
+
+### Get the specific plan for today
+GET http://localhost:8080/api/plans/today

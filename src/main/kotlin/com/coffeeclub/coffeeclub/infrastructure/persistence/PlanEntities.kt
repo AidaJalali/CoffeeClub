@@ -9,7 +9,10 @@ import java.util.UUID
 class WeeklyPlanEntity(
         @Id
         var id: UUID = UUID.randomUUID(),
+
+        @Column(name = "plan_year")
         var year: Int = 0,
+
         var weekOfYear: Int = 0,
 
         @OneToMany(mappedBy = "weeklyPlan", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
