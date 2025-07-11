@@ -17,17 +17,29 @@ interface AuthPageProps {
 
 const AuthPage = ({ onAuth }: AuthPageProps) => {
     const [isLoading, setIsLoading] = useState(false);
+    const [loginError, setLoginError] = useState<string | null>(null);
+    const [registerError, setRegisterError] = useState<string | null>(null);
     const { toast } = useToast();
 
     const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setIsLoading(true);
+        setLoginError(null);
 
         const formData = new FormData(e.currentTarget);
         const email = formData.get('email') as string;
 
+        if (!email.trim()) {
+            setLoginError('Email is required');
+            setIsLoading(false);
+            return;
+        }
+
         try {
+            console.log('Attempting login with email:', email);
             const response = await api.loginUser({ email });
+            console.log('Login response:', response.data);
+            
             const userData: FrontendUser = {
                 email: response.data.email,
                 name: response.data.name,
@@ -39,10 +51,15 @@ const AuthPage = ({ onAuth }: AuthPageProps) => {
                 title: "Welcome back!",
                 description: "You've successfully logged in to Coffee Club.",
             });
-        } catch (error) {
+        } catch (error: any) {
+            console.error('Login error:', error);
+            const errorMessage = error.response?.data?.message || 
+                                error.response?.status === 401 ? 'Invalid email or user not found' :
+                                error.message || 'Login failed. Please try again.';
+            setLoginError(errorMessage);
             toast({
                 title: "Login failed",
-                description: "Invalid email or user not found. Please try again.",
+                description: errorMessage,
                 variant: "destructive"
             });
         } finally {
@@ -53,13 +70,23 @@ const AuthPage = ({ onAuth }: AuthPageProps) => {
     const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setIsLoading(true);
+        setRegisterError(null);
 
         const formData = new FormData(e.currentTarget);
         const email = formData.get('email') as string;
         const name = formData.get('name') as string;
 
+        if (!email.trim() || !name.trim()) {
+            setRegisterError('Name and email are required');
+            setIsLoading(false);
+            return;
+        }
+
         try {
+            console.log('Attempting registration with:', { name, email });
             const response = await api.registerUser({ name, email });
+            console.log('Registration response:', response.data);
+            
             const userData: FrontendUser = {
                 email: response.data.email,
                 name: response.data.name,
@@ -71,10 +98,14 @@ const AuthPage = ({ onAuth }: AuthPageProps) => {
                 title: "Account created!",
                 description: "Welcome to Coffee Club! Your account has been created successfully.",
             });
-        } catch (error) {
+        } catch (error: any) {
+            console.error('Registration error:', error);
+            const errorMessage = error.response?.data?.message || 
+                                error.message || 'Registration failed. Please try again.';
+            setRegisterError(errorMessage);
             toast({
                 title: "Registration failed",
-                description: "Failed to create account. Please try again.",
+                description: errorMessage,
                 variant: "destructive"
             });
         } finally {
@@ -122,19 +153,15 @@ const AuthPage = ({ onAuth }: AuthPageProps) => {
                                             type="email"
                                             placeholder="your@email.com"
                                             required
+                                            disabled={isLoading}
                                         />
                                     </div>
 
-                                    <div className="space-y-2">
-                                        <Label htmlFor="login-password">Password</Label>
-                                        <Input
-                                            id="login-password"
-                                            name="password"
-                                            type="password"
-                                            placeholder="••••••••"
-                                            required
-                                        />
-                                    </div>
+                                    {loginError && (
+                                        <div className="text-red-600 text-sm bg-red-50 p-2 rounded">
+                                            {loginError}
+                                        </div>
+                                    )}
 
                                     <Button
                                         type="submit"
@@ -156,6 +183,7 @@ const AuthPage = ({ onAuth }: AuthPageProps) => {
                                             type="text"
                                             placeholder="John Doe"
                                             required
+                                            disabled={isLoading}
                                         />
                                     </div>
 
@@ -167,19 +195,15 @@ const AuthPage = ({ onAuth }: AuthPageProps) => {
                                             type="email"
                                             placeholder="your@email.com"
                                             required
+                                            disabled={isLoading}
                                         />
                                     </div>
 
-                                    <div className="space-y-2">
-                                        <Label htmlFor="register-password">Password</Label>
-                                        <Input
-                                            id="register-password"
-                                            name="password"
-                                            type="password"
-                                            placeholder="••••••••"
-                                            required
-                                        />
-                                    </div>
+                                    {registerError && (
+                                        <div className="text-red-600 text-sm bg-red-50 p-2 rounded">
+                                            {registerError}
+                                        </div>
+                                    )}
 
                                     <Button
                                         type="submit"

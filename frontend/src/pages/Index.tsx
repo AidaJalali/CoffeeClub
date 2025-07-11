@@ -334,7 +334,7 @@ const Index = () => {
                         </p>
                     </div>
 
-                    {todaysPlan?.coffeeMakers ? (
+                    {todaysPlan?.coffeeMakerIds ? (
                         <div className="max-w-4xl mx-auto">
                             <Card className="glass-effect border-0 mb-6">
                                 <CardHeader>
@@ -345,7 +345,7 @@ const Index = () => {
                                 </CardHeader>
                                 <CardContent>
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                        {todaysPlan.coffeeMakers.map(makerId => (
+                                        {todaysPlan.coffeeMakerIds.map(makerId => (
                                             <div
                                                 key={makerId}
                                                 className="p-3 rounded-lg bg-white/50 text-center"

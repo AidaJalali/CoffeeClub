@@ -5,38 +5,64 @@ import com.coffeeclub.coffeeclub.infrastructure.persistence.UserRepository
 import com.coffeeclub.coffeeclub.infrastructure.persistence.UserEntity
 import com.coffeeclub.coffeeclub.infrastructure.web.dto.CreateUserRequest
 import org.springframework.stereotype.Service
-
-
+import org.slf4j.LoggerFactory
 
 @Service
 class UserService(
     val userRepository: UserRepository,
 ){
+    private val logger = LoggerFactory.getLogger(UserService::class.java)
+
     fun createUser(name: String, email: String): User {
-            val user = User(
-                name = name,
-                email = email
-            )
+        logger.info("Creating user with name: $name, email: $email")
+        
+        val user = User(
+            name = name,
+            email = email
+        )
 
-            val userEntity = UserEntity(
-                id = user.id,
-                name = user.name,
-                email = user.email,
-                isActive = true
-            )
+        val userEntity = UserEntity(
+            id = user.id,
+            name = user.name,
+            email = user.email,
+            isActive = true
+        )
 
-        userRepository.save(userEntity)
-        return user
+        val savedEntity = userRepository.save(userEntity)
+        logger.info("User created successfully with ID: ${savedEntity.id}")
+        
+        return User(
+            id = savedEntity.id,
+            name = savedEntity.name,
+            email = savedEntity.email,
+            isActive = savedEntity.isActive
+        )
     }
 
     fun registerUser(request: CreateUserRequest): User {
-        // In a real app, you'd check if the email already exists
+        logger.info("Registering user: ${request.email}")
+        
+        // Check if user already exists
+        val existingUser = userRepository.findAll().find { it.email == request.email }
+        if (existingUser != null) {
+            logger.warn("User with email ${request.email} already exists")
+            throw IllegalArgumentException("User with this email already exists")
+        }
+        
         return createUser(request.name, request.email)
     }
 
     fun loginUser(email: String): User? {
+        logger.info("Attempting login for email: $email")
+        
         val userEntity = userRepository.findAll().find { it.email == email }
-        return userEntity?.toDomain()
+        if (userEntity != null) {
+            logger.info("Login successful for user: ${userEntity.name}")
+            return userEntity.toDomain()
+        } else {
+            logger.warn("Login failed - no user found with email: $email")
+            return null
+        }
     }
 
     private fun UserEntity.toDomain() = User(
