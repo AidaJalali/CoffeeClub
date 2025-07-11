@@ -1,0 +1,7 @@
+# IDE configuration
+.idea/
+*.iml
+
+# OS generated files
+.DS_Store
+Thumbs.db
