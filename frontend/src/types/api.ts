@@ -11,7 +11,7 @@ export interface DailyPlan {
     id: string; // UUID as string for frontend
     date: string; // ISO date string
     activeUsers: string[]; // Array of user UUIDs as strings
-    coffeeMakers: string[]; // Array of user UUIDs as strings
+    coffeeMakerIds: string[]; // Array of user UUIDs as strings - matches backend DTO
 }
 
 export interface WeeklyPlan {

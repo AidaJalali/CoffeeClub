@@ -40,22 +40,22 @@ const Index = () => {
     }, [user?.plan]);
 
     // Create morning and evening sessions from today's plan
-    const todaysSessions = todaysPlan?.coffeeMakers ? [
+    const todaysSessions = todaysPlan?.coffeeMakerIds ? [
         {
             title: "Morning Coffee Session",
             time: "9:00 AM",
             date: "Today",
             location: "Main Café",
-            attendees: todaysPlan.coffeeMakers.length,
-            description: `Coffee makers: ${todaysPlan.coffeeMakers.join(', ')}`
+            attendees: todaysPlan.coffeeMakerIds.length,
+            description: `Coffee makers: ${todaysPlan.coffeeMakerIds.join(', ')}`
         },
         {
             title: "Evening Coffee Session",
             time: "6:00 PM",
             date: "Today",
             location: "Main Café",
-            attendees: todaysPlan.coffeeMakers.length,
-            description: `Coffee makers: ${todaysPlan.coffeeMakers.join(', ')}`
+            attendees: todaysPlan.coffeeMakerIds.length,
+            description: `Coffee makers: ${todaysPlan.coffeeMakerIds.join(', ')}`
         }
     ] : [];
 
