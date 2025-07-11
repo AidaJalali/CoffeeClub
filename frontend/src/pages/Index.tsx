@@ -12,22 +12,13 @@ import WeeklySchedule from '@/components/WeeklySchedule';
 import AuthPage from '@/components/AuthPage';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-
-interface User {
-    email: string;
-    name: string;
-    plan?: 'free' | 'daily' | 'weekly';
-}
-
-interface TodaysPlan {
-    date: string;
-    coffeeMakerIds: string[];
-}
+import { api } from '@/services/api';
+import type { FrontendUser, DailyPlan } from '@/types/api';
 
 const Index = () => {
-    const [user, setUser] = useState<User | null>(null);
+    const [user, setUser] = useState<FrontendUser | null>(null);
     const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
-    const [todaysPlan, setTodaysPlan] = useState<TodaysPlan | null>(null);
+    const [todaysPlan, setTodaysPlan] = useState<DailyPlan | null>(null);
     const [error, setError] = useState<string | null>(null);
     const { toast } = useToast();
 
@@ -35,16 +26,8 @@ const Index = () => {
     useEffect(() => {
         const fetchTodaysPlan = async () => {
             try {
-                const response = await fetch('http://localhost:8080/api/plans/today');
-                if (response.status === 204 || response.headers.get("content-length") === "0") {
-                    // Handle empty response for "no plan today"
-                    return;
-                }
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const data = await response.json();
-                setTodaysPlan(data);
+                const response = await api.getTodaysPlan();
+                setTodaysPlan(response.data);
             } catch (e) {
                 setError(e instanceof Error ? e.message : 'Failed to fetch plan');
                 console.error("Could not fetch the plan:", e);
@@ -57,22 +40,22 @@ const Index = () => {
     }, [user?.plan]);
 
     // Create morning and evening sessions from today's plan
-    const todaysSessions = todaysPlan?.coffeeMakerIds ? [
+    const todaysSessions = todaysPlan?.coffeeMakers ? [
         {
             title: "Morning Coffee Session",
             time: "9:00 AM",
             date: "Today",
             location: "Main Café",
-            attendees: todaysPlan.coffeeMakerIds.length,
-            description: `Coffee makers: ${todaysPlan.coffeeMakerIds.join(', ')}`
+            attendees: todaysPlan.coffeeMakers.length,
+            description: `Coffee makers: ${todaysPlan.coffeeMakers.join(', ')}`
         },
         {
             title: "Evening Coffee Session",
             time: "6:00 PM",
             date: "Today",
             location: "Main Café",
-            attendees: todaysPlan.coffeeMakerIds.length,
-            description: `Coffee makers: ${todaysPlan.coffeeMakerIds.join(', ')}`
+            attendees: todaysPlan.coffeeMakers.length,
+            description: `Coffee makers: ${todaysPlan.coffeeMakers.join(', ')}`
         }
     ] : [];
 
@@ -174,7 +157,7 @@ const Index = () => {
         }
     ];
 
-    const handleAuth = (userData: User) => {
+    const handleAuth = (userData: FrontendUser) => {
         setUser(userData);
     };
 
@@ -351,7 +334,7 @@ const Index = () => {
                         </p>
                     </div>
 
-                    {todaysPlan?.coffeeMakerIds ? (
+                    {todaysPlan?.coffeeMakers ? (
                         <div className="max-w-4xl mx-auto">
                             <Card className="glass-effect border-0 mb-6">
                                 <CardHeader>
@@ -362,7 +345,7 @@ const Index = () => {
                                 </CardHeader>
                                 <CardContent>
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                        {todaysPlan.coffeeMakerIds.map(makerId => (
+                                        {todaysPlan.coffeeMakers.map(makerId => (
                                             <div
                                                 key={makerId}
                                                 className="p-3 rounded-lg bg-white/50 text-center"

@@ -8,9 +8,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import CoffeeIcon from '@/components/CoffeeIcon';
 import CoffeeBackground from '@/components/CoffeeBackground';
 import { useToast } from '@/hooks/use-toast';
+import { api } from '@/services/api';
+import type { FrontendUser } from '@/types/api';
 
 interface AuthPageProps {
-    onAuth: (user: { email: string; name: string }) => void;
+    onAuth: (user: FrontendUser) => void;
 }
 
 const AuthPage = ({ onAuth }: AuthPageProps) => {
@@ -23,19 +25,29 @@ const AuthPage = ({ onAuth }: AuthPageProps) => {
 
         const formData = new FormData(e.currentTarget);
         const email = formData.get('email') as string;
-        const password = formData.get('password') as string;
 
-        // Simulate API call
-        setTimeout(() => {
-            if (email && password) {
-                onAuth({ email, name: email.split('@')[0] });
-                toast({
-                    title: "Welcome back!",
-                    description: "You've successfully logged in to Coffee Club.",
-                });
-            }
+        try {
+            const response = await api.loginUser({ email });
+            const userData: FrontendUser = {
+                email: response.data.email,
+                name: response.data.name,
+                isActive: response.data.isActive
+            };
+            
+            onAuth(userData);
+            toast({
+                title: "Welcome back!",
+                description: "You've successfully logged in to Coffee Club.",
+            });
+        } catch (error) {
+            toast({
+                title: "Login failed",
+                description: "Invalid email or user not found. Please try again.",
+                variant: "destructive"
+            });
+        } finally {
             setIsLoading(false);
-        }, 1000);
+        }
     };
 
     const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -44,20 +56,30 @@ const AuthPage = ({ onAuth }: AuthPageProps) => {
 
         const formData = new FormData(e.currentTarget);
         const email = formData.get('email') as string;
-        const password = formData.get('password') as string;
         const name = formData.get('name') as string;
 
-        // Simulate API call
-        setTimeout(() => {
-            if (email && password && name) {
-                onAuth({ email, name });
-                toast({
-                    title: "Account created!",
-                    description: "Welcome to Coffee Club! Your account has been created successfully.",
-                });
-            }
+        try {
+            const response = await api.registerUser({ name, email });
+            const userData: FrontendUser = {
+                email: response.data.email,
+                name: response.data.name,
+                isActive: response.data.isActive
+            };
+            
+            onAuth(userData);
+            toast({
+                title: "Account created!",
+                description: "Welcome to Coffee Club! Your account has been created successfully.",
+            });
+        } catch (error) {
+            toast({
+                title: "Registration failed",
+                description: "Failed to create account. Please try again.",
+                variant: "destructive"
+            });
+        } finally {
             setIsLoading(false);
-        }, 1000);
+        }
     };
 
     return (

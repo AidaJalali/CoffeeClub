@@ -3,6 +3,8 @@ package com.coffeeclub.coffeeclub.infrastructure.web
 import com.coffeeclub.coffeeclub.application.PlanService
 import com.coffeeclub.coffeeclub.domain.DailyPlan
 import com.coffeeclub.coffeeclub.domain.WeeklyPlan
+import com.coffeeclub.coffeeclub.infrastructure.web.dto.DailyPlanResponse
+import com.coffeeclub.coffeeclub.infrastructure.web.dto.WeeklyPlanResponse
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -24,8 +26,9 @@ class PlanController(
      */
     @PostMapping("/weekly")
     @ResponseStatus(HttpStatus.CREATED)
-    fun createWeeklyPlan(): WeeklyPlan {
-        return planService.generateAndSaveWeeklyPlan()
+    fun createWeeklyPlan(): WeeklyPlanResponse {
+        val weeklyPlan = planService.generateAndSaveWeeklyPlan()
+        return WeeklyPlanResponse.fromDomain(weeklyPlan)
     }
 
     /**
@@ -33,8 +36,9 @@ class PlanController(
      * Fetches the plan for the current week.
      */
     @GetMapping("/weekly/current")
-    fun getCurrentWeeklyPlan(): WeeklyPlan? {
-        return planService.findCurrentWeeklyPlan()
+    fun getCurrentWeeklyPlan(): WeeklyPlanResponse? {
+        val weeklyPlan = planService.findCurrentWeeklyPlan()
+        return weeklyPlan?.let { WeeklyPlanResponse.fromDomain(it) }
     }
 
     /**
@@ -42,12 +46,14 @@ class PlanController(
      * Fetches the plan specifically for today.
      */
     @GetMapping("/today")
-    fun getTodaysPlan(): DailyPlan? {
-        return planService.findTodaysPlan()
+    fun getTodaysPlan(): DailyPlanResponse? {
+        val dailyPlan = planService.findTodaysPlan()
+        return dailyPlan?.let { DailyPlanResponse.fromDomain(it) }
     }
 
     @GetMapping("/{id}")
-    fun getPlanById(@PathVariable id: UUID): DailyPlan? {
-        return planService.findTodaysPlan()
+    fun getPlanById(@PathVariable id: UUID): DailyPlanResponse? {
+        val dailyPlan = planService.findTodaysPlan()
+        return dailyPlan?.let { DailyPlanResponse.fromDomain(it) }
     }
 }

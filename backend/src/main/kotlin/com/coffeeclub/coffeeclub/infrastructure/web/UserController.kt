@@ -15,15 +15,16 @@ class UserController(
 ) {
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
-    fun registerUser(@RequestBody request: CreateUserRequest): User {
-        return userService.registerUser(request)
+    fun registerUser(@RequestBody request: CreateUserRequest): UserResponse {
+        val user = userService.registerUser(request)
+        return UserResponse.fromDomain(user)
     }
 
     @PostMapping("/login")
-    fun login(@RequestBody request: LoginRequest): ResponseEntity<User> {
+    fun login(@RequestBody request: LoginRequest): ResponseEntity<UserResponse> {
         val user = userService.loginUser(request.email)
         return if (user != null) {
-            ResponseEntity.ok(user)
+            ResponseEntity.ok(UserResponse.fromDomain(user))
         } else {
             ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
         }
