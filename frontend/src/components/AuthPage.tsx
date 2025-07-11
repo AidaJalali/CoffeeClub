@@ -28,16 +28,17 @@ const AuthPage = ({ onAuth }: AuthPageProps) => {
 
         const formData = new FormData(e.currentTarget);
         const email = formData.get('email') as string;
+        const password = formData.get('password') as string;
 
-        if (!email.trim()) {
-            setLoginError('Email is required');
+        if (!email.trim() || !password.trim()) {
+            setLoginError('Email and password are required');
             setIsLoading(false);
             return;
         }
 
         try {
             console.log('Attempting login with email:', email);
-            const response = await api.loginUser({ email });
+            const response = await api.loginUser({ email, password });
             console.log('Login response:', response.data);
             
             const userData: FrontendUser = {
@@ -54,7 +55,7 @@ const AuthPage = ({ onAuth }: AuthPageProps) => {
         } catch (error: any) {
             console.error('Login error:', error);
             const errorMessage = error.response?.data?.message || 
-                                error.response?.status === 401 ? 'Invalid email or user not found' :
+                                error.response?.status === 401 ? 'Invalid email or password' :
                                 error.message || 'Login failed. Please try again.';
             setLoginError(errorMessage);
             toast({
@@ -75,16 +76,23 @@ const AuthPage = ({ onAuth }: AuthPageProps) => {
         const formData = new FormData(e.currentTarget);
         const email = formData.get('email') as string;
         const name = formData.get('name') as string;
+        const password = formData.get('password') as string;
 
-        if (!email.trim() || !name.trim()) {
-            setRegisterError('Name and email are required');
+        if (!email.trim() || !name.trim() || !password.trim()) {
+            setRegisterError('Name, email, and password are required');
+            setIsLoading(false);
+            return;
+        }
+
+        if (password.length < 6) {
+            setRegisterError('Password must be at least 6 characters long');
             setIsLoading(false);
             return;
         }
 
         try {
             console.log('Attempting registration with:', { name, email });
-            const response = await api.registerUser({ name, email });
+            const response = await api.registerUser({ name, email, password });
             console.log('Registration response:', response.data);
             
             const userData: FrontendUser = {
@@ -157,6 +165,18 @@ const AuthPage = ({ onAuth }: AuthPageProps) => {
                                         />
                                     </div>
 
+                                    <div className="space-y-2">
+                                        <Label htmlFor="login-password">Password</Label>
+                                        <Input
+                                            id="login-password"
+                                            name="password"
+                                            type="password"
+                                            placeholder="••••••••"
+                                            required
+                                            disabled={isLoading}
+                                        />
+                                    </div>
+
                                     {loginError && (
                                         <div className="text-red-600 text-sm bg-red-50 p-2 rounded">
                                             {loginError}
@@ -194,6 +214,18 @@ const AuthPage = ({ onAuth }: AuthPageProps) => {
                                             name="email"
                                             type="email"
                                             placeholder="your@email.com"
+                                            required
+                                            disabled={isLoading}
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="register-password">Password</Label>
+                                        <Input
+                                            id="register-password"
+                                            name="password"
+                                            type="password"
+                                            placeholder="••••••••"
                                             required
                                             disabled={isLoading}
                                         />

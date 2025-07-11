@@ -40,15 +40,15 @@ class UserController(
     fun login(@RequestBody request: LoginRequest): ResponseEntity<Any> {
         logger.info("Received login request for email: ${request.email}")
         
-        val user = userService.loginUser(request.email)
+        val user = userService.loginUser(request.email, request.password)
         return if (user != null) {
             val userResponse = UserResponse.fromDomain(user)
             logger.info("Login successful for user: ${user.email}")
             ResponseEntity.ok(userResponse)
         } else {
-            logger.warn("Login failed - no user found with email: ${request.email}")
+            logger.warn("Login failed - invalid credentials for email: ${request.email}")
             ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(mapOf("message" to "Invalid email or user not found"))
+                .body(mapOf("message" to "Invalid email or password"))
         }
     }
 

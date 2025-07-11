@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backend API Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+        pre { background-color: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Backend API Test</h1>
+    <p>This page helps test if your backend is running and CORS is configured properly.</p>
+
+    <div class="test-section">
+        <h3>Test 1: Check if backend is reachable</h3>
+        <button onclick="testBackendReachable()">Test Backend Connection</button>
+        <div id="backend-test-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>Test 2: Register a new user</h3>
+        <button onclick="testRegister()">Test Registration</button>
+        <div id="register-test-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>Test 3: Login with registered user</h3>
+        <button onclick="testLogin()">Test Login</button>
+        <div id="login-test-result"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8080/api';
+
+        async function testBackendReachable() {
+            const resultDiv = document.getElementById('backend-test-result');
+            resultDiv.innerHTML = '<p>Testing...</p>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/plans/today`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = '<p class="success">✅ Backend is reachable! Status: ' + response.status + '</p>';
+                } else {
+                    resultDiv.innerHTML = '<p class="error">❌ Backend responded with error: ' + response.status + '</p>';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = '<p class="error">❌ Backend is not reachable: ' + error.message + '</p>';
+            }
+        }
+
+        async function testRegister() {
+            const resultDiv = document.getElementById('register-test-result');
+            resultDiv.innerHTML = '<p>Testing registration...</p>';
+            
+            const testUser = {
+                name: 'Test User',
+                email: 'test@example.com',
+                password: 'password123'
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/users/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(testUser)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = '<p class="success">✅ Registration successful!</p><pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                } else {
+                    resultDiv.innerHTML = '<p class="error">❌ Registration failed: ' + response.status + '</p><pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = '<p class="error">❌ Registration error: ' + error.message + '</p>';
+            }
+        }
+
+        async function testLogin() {
+            const resultDiv = document.getElementById('login-test-result');
+            resultDiv.innerHTML = '<p>Testing login...</p>';
+            
+            const loginData = {
+                email: 'test@example.com',
+                password: 'password123'
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/users/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(loginData)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = '<p class="success">✅ Login successful!</p><pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                } else {
+                    resultDiv.innerHTML = '<p class="error">❌ Login failed: ' + response.status + '</p><pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = '<p class="error">❌ Login error: ' + error.message + '</p>';
+            }
+        }
+    </script>
+</body>
+</html> 

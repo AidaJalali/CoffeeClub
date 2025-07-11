@@ -13,5 +13,6 @@ class UserEntity(
     val id: UUID,
     val name: String,
     val email: String,
+    val password: String, // Added password field
     val isActive: Boolean
 )

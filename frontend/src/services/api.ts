@@ -13,13 +13,57 @@ const apiClient = axios.create({
     headers: {
         'Content-Type': 'application/json',
     },
+    timeout: 10000, // 10 second timeout
 });
+
+// Add request interceptor for debugging
+apiClient.interceptors.request.use(
+    (config) => {
+        console.log('API Request:', {
+            method: config.method?.toUpperCase(),
+            url: config.url,
+            data: config.data,
+            headers: config.headers
+        });
+        return config;
+    },
+    (error) => {
+        console.error('API Request Error:', error);
+        return Promise.reject(error);
+    }
+);
 
 // Add response interceptor for better error handling
 apiClient.interceptors.response.use(
-    (response) => response,
+    (response) => {
+        console.log('API Response:', {
+            status: response.status,
+            data: response.data,
+            headers: response.headers
+        });
+        return response;
+    },
     (error) => {
-        console.error('API Error:', error.response?.data || error.message);
+        console.error('API Error:', {
+            message: error.message,
+            status: error.response?.status,
+            data: error.response?.data,
+            config: {
+                method: error.config?.method?.toUpperCase(),
+                url: error.config?.url,
+                data: error.config?.data
+            }
+        });
+        
+        // Handle specific error types
+        if (error.code === 'ECONNABORTED') {
+            console.error('Request timeout - server might be down');
+        } else if (error.code === 'ERR_NETWORK') {
+            console.error('Network error - check if backend is running and CORS is configured');
+        } else if (error.response?.status === 0) {
+            console.error('CORS error - check backend CORS configuration');
+        }
+        
         return Promise.reject(error);
     }
 );
