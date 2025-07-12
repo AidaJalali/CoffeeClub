@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CORS Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+        pre { background-color: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>CORS Test</h1>
+    <p>Testing CORS configuration between frontend (localhost:5173) and backend (localhost:8080)</p>
+
+    <div class="test-section">
+        <h3>Test 1: Simple GET request</h3>
+        <button onclick="testGet()">Test GET Request</button>
+        <div id="get-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>Test 2: POST request with JSON</h3>
+        <button onclick="testPost()">Test POST Request</button>
+        <div id="post-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>Test 3: OPTIONS preflight request</h3>
+        <button onclick="testOptions()">Test OPTIONS Request</button>
+        <div id="options-result"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8080/api';
+
+        async function testGet() {
+            const resultDiv = document.getElementById('get-result');
+            resultDiv.innerHTML = '<p>Testing GET request...</p>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/plans/today`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                console.log('GET Response:', response);
+                console.log('GET Headers:', response.headers);
+                
+                if (response.ok) {
+                    const data = await response.text();
+                    resultDiv.innerHTML = '<p class="success">✅ GET request successful!</p><pre>Status: ' + response.status + '\nData: ' + data + '</pre>';
+                } else {
+                    resultDiv.innerHTML = '<p class="error">❌ GET request failed: ' + response.status + '</p>';
+                }
+            } catch (error) {
+                console.error('GET Error:', error);
+                resultDiv.innerHTML = '<p class="error">❌ GET request error: ' + error.message + '</p>';
+            }
+        }
+
+        async function testPost() {
+            const resultDiv = document.getElementById('post-result');
+            resultDiv.innerHTML = '<p>Testing POST request...</p>';
+            
+            const testData = {
+                name: 'CORS Test User',
+                email: 'cors@test.com',
+                password: 'testpass123'
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/users/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(testData)
+                });
+                
+                console.log('POST Response:', response);
+                console.log('POST Headers:', response.headers);
+                
+                const data = await response.text();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = '<p class="success">✅ POST request successful!</p><pre>Status: ' + response.status + '\nData: ' + data + '</pre>';
+                } else {
+                    resultDiv.innerHTML = '<p class="error">❌ POST request failed: ' + response.status + '</p><pre>Error: ' + data + '</pre>';
+                }
+            } catch (error) {
+                console.error('POST Error:', error);
+                resultDiv.innerHTML = '<p class="error">❌ POST request error: ' + error.message + '</p>';
+            }
+        }
+
+        async function testOptions() {
+            const resultDiv = document.getElementById('options-result');
+            resultDiv.innerHTML = '<p>Testing OPTIONS request...</p>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/users/register`, {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Access-Control-Request-Method': 'POST',
+                        'Access-Control-Request-Headers': 'Content-Type'
+                    }
+                });
+                
+                console.log('OPTIONS Response:', response);
+                console.log('OPTIONS Headers:', response.headers);
+                
+                resultDiv.innerHTML = '<p class="success">✅ OPTIONS request successful!</p><pre>Status: ' + response.status + '\nCORS Headers: ' + 
+                    'Access-Control-Allow-Origin: ' + response.headers.get('Access-Control-Allow-Origin') + '\n' +
+                    'Access-Control-Allow-Methods: ' + response.headers.get('Access-Control-Allow-Methods') + '\n' +
+                    'Access-Control-Allow-Headers: ' + response.headers.get('Access-Control-Allow-Headers') + '</pre>';
+            } catch (error) {
+                console.error('OPTIONS Error:', error);
+                resultDiv.innerHTML = '<p class="error">❌ OPTIONS request error: ' + error.message + '</p>';
+            }
+        }
+    </script>
+</body>
+</html> 

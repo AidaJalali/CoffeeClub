@@ -39,7 +39,7 @@ const AuthPage = ({ onAuth }: AuthPageProps) => {
         try {
             console.log('Attempting login with email:', email);
             const response = await api.loginUser({ email, password });
-            console.log('Login response:', response.data);
+            console.log('Login response:', JSON.stringify(response.data, null, 2));
             
             const userData: FrontendUser = {
                 email: response.data.email,
@@ -54,9 +54,25 @@ const AuthPage = ({ onAuth }: AuthPageProps) => {
             });
         } catch (error: any) {
             console.error('Login error:', error);
-            const errorMessage = error.response?.data?.message || 
-                                error.response?.status === 401 ? 'Invalid email or password' :
-                                error.message || 'Login failed. Please try again.';
+            
+            let errorMessage = 'Login failed. Please try again.';
+            
+            if (error.code === 'ERR_NETWORK') {
+                errorMessage = 'Network error: Cannot connect to server. Please check if the backend is running.';
+            } else if (error.code === 'ECONNABORTED') {
+                errorMessage = 'Request timeout: Server is not responding. Please try again.';
+            } else if (error.response?.status === 0) {
+                errorMessage = 'CORS error: Cross-origin request blocked. Please check server configuration.';
+            } else if (error.response?.data?.message) {
+                errorMessage = error.response.data.message;
+            } else if (error.response?.status === 401) {
+                errorMessage = 'Invalid email or password.';
+            } else if (error.response?.status === 400) {
+                errorMessage = 'Invalid data: Please check your input and try again.';
+            } else if (error.response?.status >= 500) {
+                errorMessage = 'Server error: Please try again later.';
+            }
+            
             setLoginError(errorMessage);
             toast({
                 title: "Login failed",
@@ -91,9 +107,9 @@ const AuthPage = ({ onAuth }: AuthPageProps) => {
         }
 
         try {
-            console.log('Attempting registration with:', { name, email });
+            console.log('Attempting registration with:', JSON.stringify({ name, email, password: '***' }, null, 2));
             const response = await api.registerUser({ name, email, password });
-            console.log('Registration response:', response.data);
+            console.log('Registration response:', JSON.stringify(response.data, null, 2));
             
             const userData: FrontendUser = {
                 email: response.data.email,
@@ -108,8 +124,25 @@ const AuthPage = ({ onAuth }: AuthPageProps) => {
             });
         } catch (error: any) {
             console.error('Registration error:', error);
-            const errorMessage = error.response?.data?.message || 
-                                error.message || 'Registration failed. Please try again.';
+            
+            let errorMessage = 'Registration failed. Please try again.';
+            
+            if (error.code === 'ERR_NETWORK') {
+                errorMessage = 'Network error: Cannot connect to server. Please check if the backend is running.';
+            } else if (error.code === 'ECONNABORTED') {
+                errorMessage = 'Request timeout: Server is not responding. Please try again.';
+            } else if (error.response?.status === 0) {
+                errorMessage = 'CORS error: Cross-origin request blocked. Please check server configuration.';
+            } else if (error.response?.data?.message) {
+                errorMessage = error.response.data.message;
+            } else if (error.response?.status === 400) {
+                errorMessage = 'Invalid data: Please check your input and try again.';
+            } else if (error.response?.status === 409) {
+                errorMessage = 'User already exists with this email.';
+            } else if (error.response?.status >= 500) {
+                errorMessage = 'Server error: Please try again later.';
+            }
+            
             setRegisterError(errorMessage);
             toast({
                 title: "Registration failed",
