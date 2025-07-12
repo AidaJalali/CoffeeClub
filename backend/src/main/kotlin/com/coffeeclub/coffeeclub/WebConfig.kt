@@ -1,4 +1,4 @@
-package com.coffeeclub
+package com.coffeeclub.coffeeclub
 
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.servlet.config.annotation.CorsRegistry
@@ -8,10 +8,11 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 class WebConfig : WebMvcConfigurer {
     
     override fun addCorsMappings(registry: CorsRegistry) {
-        registry.addMapping("/**")
-            .allowedOriginPatterns("*")
-            .allowedMethods("*")
+        registry.addMapping("/api/**")
+            .allowedOrigins("http://localhost:5173", "http://127.0.0.1:5173")
+            .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD")
             .allowedHeaders("*")
             .allowCredentials(false)
+            .maxAge(3600)
     }
 }

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CORS Test</title>
+</head>
+<body>
+    <h1>CORS Test</h1>
+    <button onclick="testCors()">Test CORS</button>
+    <div id="result"></div>
+
+    <script>
+        async function testCors() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Testing...';
+            
+            try {
+                // Test OPTIONS preflight
+                const response = await fetch('http://localhost:8080/api/users/register', {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Origin': 'http://localhost:5173',
+                        'Access-Control-Request-Method': 'POST',
+                        'Access-Control-Request-Headers': 'Content-Type'
+                    }
+                });
+                
+                resultDiv.innerHTML = `
+                    <h3>OPTIONS Response:</h3>
+                    <p>Status: ${response.status}</p>
+                    <p>Headers:</p>
+                    <pre>${JSON.stringify(Object.fromEntries(response.headers.entries()), null, 2)}</pre>
+                `;
+                
+                // Test actual POST request
+                const postResponse = await fetch('http://localhost:8080/api/users/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Origin': 'http://localhost:5173'
+                    },
+                    body: JSON.stringify({
+                        name: 'Test User',
+                        email: 'test@example.com',
+                        password: 'password123'
+                    })
+                });
+                
+                resultDiv.innerHTML += `
+                    <h3>POST Response:</h3>
+                    <p>Status: ${postResponse.status}</p>
+                    <p>Body: ${await postResponse.text()}</p>
+                `;
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html> 
