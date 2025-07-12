@@ -58,4 +58,54 @@ class UserController(
         // You would add the logic for this in your UserService
         return ResponseEntity.ok().build()
     }
+
+    @GetMapping("/active")
+    fun getActiveUsers(): ResponseEntity<List<UserResponse>> {
+        logger.info("Fetching all active users")
+        val activeUsers = userService.getActiveUsers()
+        val userResponses = activeUsers.map { UserResponse.fromDomain(it) }
+        return ResponseEntity.ok(userResponses)
+    }
+
+    @PutMapping("/{id}/wallet")
+    fun updateUserWallet(
+        @PathVariable id: UUID,
+        @RequestBody request: UpdateWalletRequest
+    ): ResponseEntity<Any> {
+        logger.info("Updating user $id wallet balance to ${request.balance}")
+        
+        return try {
+            val user = userService.updateUserWallet(id, request.balance)
+            val userResponse = UserResponse.fromDomain(user)
+            ResponseEntity.ok(userResponse)
+        } catch (e: IllegalArgumentException) {
+            logger.warn("Failed to update wallet: ${e.message}")
+            ResponseEntity.badRequest().body(mapOf("message" to e.message))
+        } catch (e: Exception) {
+            logger.error("Unexpected error updating wallet", e)
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(mapOf("message" to "Failed to update wallet"))
+        }
+    }
+
+    @PutMapping("/{id}/email")
+    fun updateUserEmail(
+        @PathVariable id: UUID,
+        @RequestBody request: UpdateEmailRequest
+    ): ResponseEntity<Any> {
+        logger.info("Updating user $id email to ${request.email}")
+        
+        return try {
+            val user = userService.updateUserEmail(id, request.email)
+            val userResponse = UserResponse.fromDomain(user)
+            ResponseEntity.ok(userResponse)
+        } catch (e: IllegalArgumentException) {
+            logger.warn("Failed to update email: ${e.message}")
+            ResponseEntity.badRequest().body(mapOf("message" to e.message))
+        } catch (e: Exception) {
+            logger.error("Unexpected error updating email", e)
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(mapOf("message" to "Failed to update email"))
+        }
+    }
 }

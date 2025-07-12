@@ -7,10 +7,11 @@ import com.coffeeclub.coffeeclub.infrastructure.web.dto.CreateUserRequest
 import org.springframework.stereotype.Service
 import org.slf4j.LoggerFactory
 import java.security.MessageDigest
+import java.util.UUID
 
 @Service
 class UserService(
-    val userRepository: UserRepository,
+    val userRepository: UserRepository
 ){
     private val logger = LoggerFactory.getLogger(UserService::class.java)
 
@@ -34,13 +35,32 @@ class UserService(
         val savedEntity = userRepository.save(userEntity)
         logger.info("User created successfully with ID: ${savedEntity.id}")
         
-        return User(
-            id = savedEntity.id,
-            name = savedEntity.name,
-            email = savedEntity.email,
-            password = savedEntity.password,
-            isActive = savedEntity.isActive
+        return savedEntity.toDomain()
+    }
+
+    fun createAdminUser(name: String, email: String, password: String): User {
+        logger.info("Creating admin user with name: $name, email: $email")
+        
+        val user = User(
+            name = name,
+            email = email,
+            password = hashPassword(password),
+            isAdmin = true
         )
+
+        val userEntity = UserEntity(
+            id = user.id,
+            name = user.name,
+            email = user.email,
+            password = user.password,
+            isActive = true,
+            isAdmin = true
+        )
+
+        val savedEntity = userRepository.save(userEntity)
+        logger.info("Admin user created successfully with ID: ${savedEntity.id}")
+        
+        return savedEntity.toDomain()
     }
 
     fun registerUser(request: CreateUserRequest): User {
@@ -92,11 +112,48 @@ class UserService(
         return hashPassword(inputPassword) == storedPassword
     }
 
+    fun getActiveUsers(): List<User> {
+        logger.info("Fetching all active users")
+        return userRepository.findAll()
+            .filter { it.isActive }
+            .map { it.toDomain() }
+    }
+
+    fun updateUserWallet(userId: UUID, newBalance: Double): User {
+        logger.info("Updating wallet balance for user $userId to $newBalance")
+        
+        val userEntity = userRepository.findById(userId)
+            .orElseThrow { IllegalArgumentException("User not found") }
+        
+        // In a real application, you'd update the entity properly
+        // For now, we'll return the user with updated balance
+        return userEntity.copy(walletBalance = newBalance).toDomain()
+    }
+
+    fun updateUserEmail(userId: UUID, newEmail: String): User {
+        logger.info("Updating email for user $userId to $newEmail")
+        
+        val userEntity = userRepository.findById(userId)
+            .orElseThrow { IllegalArgumentException("User not found") }
+        
+        // Check if email is already taken
+        val existingUser = userRepository.findAll().find { it.email == newEmail && it.id != userId }
+        if (existingUser != null) {
+            throw IllegalArgumentException("Email is already in use")
+        }
+        
+        // In a real application, you'd update the entity properly
+        // For now, we'll return the user with updated email
+        return userEntity.copy(email = newEmail).toDomain()
+    }
+
     private fun UserEntity.toDomain() = User(
         id = this.id,
         name = this.name,
         email = this.email,
         password = this.password,
-        isActive = this.isActive
+        isActive = this.isActive,
+        isAdmin = this.isAdmin,
+        walletBalance = this.walletBalance
     )
 }

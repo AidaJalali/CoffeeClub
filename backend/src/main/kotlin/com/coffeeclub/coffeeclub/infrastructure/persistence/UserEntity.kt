@@ -1,18 +1,30 @@
 package com.coffeeclub.coffeeclub.infrastructure.persistence
 
-import jakarta.persistence.Entity
-import jakarta.persistence.Id
-import jakarta.persistence.Table
+import jakarta.persistence.*
 import java.util.UUID
 
-
-@Entity //this class represents a database table
-@Table(name = "coffee_users")  //table name in database
-class UserEntity(
+@Entity
+@Table(name = "coffee_users")
+data class UserEntity(
     @Id
-    val id: UUID,
-    val name: String,
-    val email: String,
-    val password: String, // Added password field
-    val isActive: Boolean
+    @Column(name = "id")
+    var id: UUID,
+    
+    @Column(name = "name", nullable = false)
+    var name: String,
+    
+    @Column(name = "email", nullable = false, unique = true)
+    var email: String,
+    
+    @Column(name = "password", nullable = false)
+    var password: String,
+    
+    @Column(name = "is_active", nullable = false)
+    var isActive: Boolean,
+    
+    @Column(name = "is_admin", nullable = false)
+    var isAdmin: Boolean = false,
+    
+    @Column(name = "wallet_balance", nullable = false)
+    var walletBalance: Double = 0.0
 )

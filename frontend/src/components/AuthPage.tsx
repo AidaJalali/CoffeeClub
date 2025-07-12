@@ -1,14 +1,16 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Coffee, Crown } from 'lucide-react';
 import CoffeeIcon from '@/components/CoffeeIcon';
 import CoffeeBackground from '@/components/CoffeeBackground';
 import { useToast } from '@/hooks/use-toast';
 import { api } from '@/services/api';
+import AdminCreationPage from './AdminCreationPage';
 import type { FrontendUser } from '@/types/api';
 
 interface AuthPageProps {
@@ -19,7 +21,21 @@ const AuthPage = ({ onAuth }: AuthPageProps) => {
     const [isLoading, setIsLoading] = useState(false);
     const [loginError, setLoginError] = useState<string | null>(null);
     const [registerError, setRegisterError] = useState<string | null>(null);
+    const [showAdminCreation, setShowAdminCreation] = useState(false);
     const { toast } = useToast();
+
+    // Scroll to top when component mounts
+    useEffect(() => {
+        window.scrollTo(0, 0);
+        document.body.style.overflow = 'hidden';
+        return () => {
+            document.body.style.overflow = 'auto';
+        };
+    }, []);
+
+    if (showAdminCreation) {
+        return <AdminCreationPage onBack={() => setShowAdminCreation(false)} />;
+    }
 
     const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -42,9 +58,11 @@ const AuthPage = ({ onAuth }: AuthPageProps) => {
             console.log('Login response:', JSON.stringify(response.data, null, 2));
             
             const userData: FrontendUser = {
+                id: response.data.id,
                 email: response.data.email,
                 name: response.data.name,
-                isActive: response.data.isActive
+                isActive: response.data.isActive,
+                isAdmin: response.data.isAdmin || false
             };
             
             onAuth(userData);
@@ -112,9 +130,11 @@ const AuthPage = ({ onAuth }: AuthPageProps) => {
             console.log('Registration response:', JSON.stringify(response.data, null, 2));
             
             const userData: FrontendUser = {
+                id: response.data.id,
                 email: response.data.email,
                 name: response.data.name,
-                isActive: response.data.isActive
+                isActive: response.data.isActive,
+                isAdmin: response.data.isAdmin || false
             };
             
             onAuth(userData);
@@ -155,21 +175,21 @@ const AuthPage = ({ onAuth }: AuthPageProps) => {
     };
 
     return (
-        <div className="min-h-screen relative flex items-center justify-center p-6">
+        <div className="min-h-screen relative flex items-center justify-center p-4 sm:p-6">
             <CoffeeBackground />
 
-            <div className="relative z-10 w-full max-w-md">
-                <div className="text-center mb-8">
+            <div className="relative z-10 w-full max-w-md mx-auto">
+                <div className="text-center mb-6 sm:mb-8">
                     <CoffeeIcon size={80} className="mx-auto mb-4" />
-                    <h1 className="text-3xl font-display font-bold text-coffee-espresso mb-2">
+                    <h1 className="text-2xl sm:text-3xl font-display font-bold text-coffee-espresso mb-2">
                         Coffee Club Scheduler
                     </h1>
-                    <p className="text-coffee-brown">
+                    <p className="text-coffee-brown text-sm sm:text-base">
                         Join fellow coffee enthusiasts for amazing brewing experiences
                     </p>
                 </div>
 
-                <Card className="glass-effect border-0">
+                <Card className="glass-effect border-0 shadow-lg">
                     <CardHeader className="text-center pb-4">
                         <CardTitle className="text-coffee-espresso">Welcome</CardTitle>
                         <CardDescription>
@@ -177,7 +197,7 @@ const AuthPage = ({ onAuth }: AuthPageProps) => {
                         </CardDescription>
                     </CardHeader>
 
-                    <CardContent>
+                    <CardContent className="px-4 sm:px-6">
                         <Tabs defaultValue="login" className="w-full">
                             <TabsList className="grid w-full grid-cols-2 mb-6">
                                 <TabsTrigger value="login">Login</TabsTrigger>
@@ -195,6 +215,7 @@ const AuthPage = ({ onAuth }: AuthPageProps) => {
                                             placeholder="your@email.com"
                                             required
                                             disabled={isLoading}
+                                            className="w-full"
                                         />
                                     </div>
 
@@ -207,18 +228,19 @@ const AuthPage = ({ onAuth }: AuthPageProps) => {
                                             placeholder="••••••••"
                                             required
                                             disabled={isLoading}
+                                            className="w-full"
                                         />
                                     </div>
 
                                     {loginError && (
-                                        <div className="text-red-600 text-sm bg-red-50 p-2 rounded">
+                                        <div className="text-red-600 text-sm bg-red-50 p-3 rounded-md border border-red-200">
                                             {loginError}
                                         </div>
                                     )}
 
                                     <Button
                                         type="submit"
-                                        className="w-full coffee-gradient hover:opacity-90"
+                                        className="w-full coffee-gradient hover:opacity-90 transition-opacity"
                                         disabled={isLoading}
                                     >
                                         {isLoading ? 'Signing in...' : 'Sign In'}
@@ -237,6 +259,7 @@ const AuthPage = ({ onAuth }: AuthPageProps) => {
                                             placeholder="John Doe"
                                             required
                                             disabled={isLoading}
+                                            className="w-full"
                                         />
                                     </div>
 
@@ -249,6 +272,7 @@ const AuthPage = ({ onAuth }: AuthPageProps) => {
                                             placeholder="your@email.com"
                                             required
                                             disabled={isLoading}
+                                            className="w-full"
                                         />
                                     </div>
 
@@ -261,18 +285,19 @@ const AuthPage = ({ onAuth }: AuthPageProps) => {
                                             placeholder="••••••••"
                                             required
                                             disabled={isLoading}
+                                            className="w-full"
                                         />
                                     </div>
 
                                     {registerError && (
-                                        <div className="text-red-600 text-sm bg-red-50 p-2 rounded">
+                                        <div className="text-red-600 text-sm bg-red-50 p-3 rounded-md border border-red-200">
                                             {registerError}
                                         </div>
                                     )}
 
                                     <Button
                                         type="submit"
-                                        className="w-full coffee-gradient hover:opacity-90"
+                                        className="w-full coffee-gradient hover:opacity-90 transition-opacity"
                                         disabled={isLoading}
                                     >
                                         {isLoading ? 'Creating account...' : 'Create Account'}
@@ -282,6 +307,16 @@ const AuthPage = ({ onAuth }: AuthPageProps) => {
                         </Tabs>
                     </CardContent>
                 </Card>
+
+                <div className="text-center mt-6">
+                    <button
+                        onClick={() => setShowAdminCreation(true)}
+                        className="text-sm text-coffee-brown hover:text-coffee-espresso transition-colors flex items-center justify-center gap-2 mx-auto"
+                    >
+                        <Crown className="w-4 h-4" />
+                        Create Admin User
+                    </button>
+                </div>
             </div>
         </div>
     );

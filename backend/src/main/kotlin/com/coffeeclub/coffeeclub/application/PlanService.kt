@@ -9,12 +9,15 @@ import java.time.LocalDate
 import java.util.Calendar
 import java.util.UUID
 import kotlin.math.ceil
+import org.slf4j.LoggerFactory
 
 @Service
 class PlanService(
     private val userRepository: UserRepository,
     private val planRepository: WeeklyPlanRepository
 ) {
+
+    private val logger = LoggerFactory.getLogger(PlanService::class.java)
 
     fun generateAndSaveWeeklyPlan(): WeeklyPlan {
         val activeUsers = userRepository.findAll().filter { it.isActive }.sortedBy { it.id }
@@ -56,6 +59,20 @@ class PlanService(
 
         // Find the daily plan that matches today's date
         return currentWeeklyPlan?.dailyPlans?.find { it.date == today }
+    }
+
+    fun ensureTodaysPlan(): DailyPlan? {
+        // First try to find today's plan
+        var todaysPlan = findTodaysPlan()
+        
+        // If no plan exists for today, generate a new weekly plan
+        if (todaysPlan == null) {
+            logger.info("No plan found for today, generating new weekly plan")
+            val newWeeklyPlan = generateAndSaveWeeklyPlan()
+            todaysPlan = newWeeklyPlan.dailyPlans.find { it.date == LocalDate.now() }
+        }
+        
+        return todaysPlan
     }
 
     private fun assignMakersForWeek(activeUsers: List<UserEntity>): Map<LocalDate, List<UserEntity>> {

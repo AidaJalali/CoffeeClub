@@ -51,6 +51,16 @@ class PlanController(
         return dailyPlan?.let { DailyPlanResponse.fromDomain(it) }
     }
 
+    /**
+     * Handles GET requests to /api/plans/today/ensure
+     * Ensures a plan exists for today, generating one if necessary.
+     */
+    @GetMapping("/today/ensure")
+    fun ensureTodaysPlan(): DailyPlanResponse? {
+        val dailyPlan = planService.ensureTodaysPlan()
+        return dailyPlan?.let { DailyPlanResponse.fromDomain(it) }
+    }
+
     @GetMapping("/{id}")
     fun getPlanById(@PathVariable id: UUID): DailyPlanResponse? {
         val dailyPlan = planService.findTodaysPlan()
