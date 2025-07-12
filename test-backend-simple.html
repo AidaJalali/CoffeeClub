@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backend Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .success { background-color: #d4edda; border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; border: 1px solid #f5c6cb; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Backend Connection Test</h1>
+    <p>Testing if backend is running and CORS is configured</p>
+    
+    <button onclick="testBackend()">Test Backend</button>
+    <button onclick="testRegistration()">Test Registration</button>
+    <div id="result"></div>
+
+    <script>
+        async function testBackend() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>Testing backend connection...</p>';
+            
+            try {
+                const response = await fetch('http://localhost:8080/api/plans/today', {
+                    method: 'GET'
+                });
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = '<div class="result success">✅ Backend is running and CORS is working!</div>';
+                } else {
+                    resultDiv.innerHTML = '<div class="result error">❌ Backend responded with error: ' + response.status + '</div>';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = '<div class="result error">❌ Backend is not reachable: ' + error.message + '</div>';
+            }
+        }
+
+        async function testRegistration() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>Testing registration...</p>';
+            
+            const testUser = {
+                name: 'Test User',
+                email: 'test@example.com',
+                password: 'password123'
+            };
+            
+            try {
+                const response = await fetch('http://localhost:8080/api/users/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(testUser)
+                });
+                
+                const data = await response.text();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = '<div class="result success">✅ Registration successful! Response: ' + data + '</div>';
+                } else {
+                    resultDiv.innerHTML = '<div class="result error">❌ Registration failed: ' + response.status + ' - ' + data + '</div>';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = '<div class="result error">❌ Registration error: ' + error.message + '</div>';
+            }
+        }
+    </script>
+</body>
+</html> 

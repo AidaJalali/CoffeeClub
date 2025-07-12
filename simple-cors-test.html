@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple CORS Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .success { background-color: #d4edda; border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; border: 1px solid #f5c6cb; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Simple CORS Test</h1>
+    <p>Testing CORS between localhost:5173 and localhost:8080</p>
+    
+    <button onclick="testCors()">Test CORS</button>
+    <div id="result"></div>
+
+    <script>
+        async function testCors() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>Testing...</p>';
+            
+            try {
+                console.log('Testing CORS...');
+                const response = await fetch('http://localhost:8080/api/plans/today', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                console.log('Response:', response);
+                console.log('Headers:', response.headers);
+                
+                if (response.ok) {
+                    const data = await response.text();
+                    resultDiv.innerHTML = '<div class="result success">✅ CORS is working! Response: ' + data + '</div>';
+                } else {
+                    resultDiv.innerHTML = '<div class="result error">❌ Request failed with status: ' + response.status + '</div>';
+                }
+            } catch (error) {
+                console.error('CORS Error:', error);
+                resultDiv.innerHTML = '<div class="result error">❌ CORS Error: ' + error.message + '</div>';
+            }
+        }
+    </script>
+</body>
+</html> 
