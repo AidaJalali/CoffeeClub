@@ -1,13 +1,7 @@
 # Coffee Club Scheduler
 
-A full-stack application for managing coffee club schedules and duties, built with Spring Boot (Kotlin) backend and React (TypeScript) frontend.
+An application for managing coffee club schedules and duties, built with Spring Boot (Kotlin) backend and React (TypeScript) frontend.
 
-## 🚀 Quick Start
-
-### Prerequisites
-- Java 21
-- Node.js 18+
-- npm or yarn
 
 ### Backend Setup
 ```bash
@@ -24,7 +18,7 @@ npm run dev
 ```
 The frontend will start on `http://localhost:5173`
 
-## 🏗️ Architecture
+##  Architecture
 
 ### Backend (Spring Boot + Kotlin)
 - **Framework**: Spring Boot 3.5.3
@@ -38,7 +32,7 @@ The frontend will start on `http://localhost:5173`
 - **UI Library**: Radix UI + Tailwind CSS
 - **Port**: 5173
 
-## 🔧 Integration Fixes Applied
+## Integration Fixes Applied
 
 ### 1. Port Configuration
 - ✅ Fixed frontend port from 8080 to 5173
@@ -62,7 +56,7 @@ The frontend will start on `http://localhost:5173`
 - ✅ Proper user data handling
 - ✅ Session management
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 CoffeeClub/
@@ -82,7 +76,7 @@ CoffeeClub/
 └── README.md
 ```
 
-## 🔌 API Endpoints
+## API Endpoints
 
 ### Authentication
 - `POST /api/users/register` - Register new user
@@ -99,7 +93,7 @@ CoffeeClub/
 ### Duty
 - `GET /api/duty/buyer` - Get next coffee buyer
 
-## 🛠️ Development
+## Development
 
 ### Backend Development
 ```bash
@@ -119,7 +113,7 @@ npm run dev
 - Username: `sa`
 - Password: `password`
 
-## 🧪 Testing
+## Testing
 
 ### Backend Tests
 ```bash
@@ -133,22 +127,9 @@ cd frontend
 npm run test
 ```
 
-## 📝 Notes
+## Notes
 
 - The application uses H2 in-memory database for development
 - All UUIDs are converted to strings for frontend compatibility
 - CORS is configured for localhost development
 - Authentication is email-based (no password required for demo)
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-1. **Port conflicts**: Ensure backend runs on 8080 and frontend on 5173
-2. **CORS errors**: Check that CORS configuration matches frontend URL
-3. **Type errors**: Ensure all TypeScript interfaces match backend DTOs
-4. **Database issues**: H2 database is in-memory and resets on restart
-
-### Logs
-- Backend logs: Check console output for Spring Boot logs
-- Frontend logs: Check browser console for React/API errors
